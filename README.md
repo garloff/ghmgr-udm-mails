@@ -34,5 +34,9 @@ manager's data.yaml file, the UCS user database dump (`udm user/users list`) and
 ## Usage
 
 ```
-scs-mails.py [-o out.csv] [-p github.pat] data.yaml users.udm
+Usage: scs-mails.py [options] data.yaml users.udm
+ Options: [-m|--mail]            only output a list of mail addresses
+          [-o|--outfile out.csv] write output to out.csv instead of stdout
+          [-p|--pat github.pat]  get mail adrs from github
+          [-h|--help]            this help
 ```

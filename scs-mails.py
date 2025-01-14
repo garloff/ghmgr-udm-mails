@@ -23,10 +23,14 @@ import yaml
 SEP = ","
 
 
-def usage():
+def usage(rc=1):
     "Help"
-    print("Usage: scs-mails.py [-o out.csv] [-p github.pat] data.yaml users.udm")
-    return 1
+    print("Usage: scs-mails.py [options] data.yaml users.udm")
+    print(" Options: [-m|--mail]            only output a list of mail addresses")
+    print("          [-o|--outfile out.csv] write output to out.csv instead of stdout")
+    print("          [-p|--pat github.pat]  get mail adrs from github")
+    print("          [-h|--help]            this help")
+    return rc
 
 
 class MailUser:
@@ -125,6 +129,7 @@ def normalizeName(nm):
     nm = nm.replace("é", "e")
     nm = nm.replace("è", "e")
     nm = nm.replace("ë", "e")
+    nm = nm.replace("á", "a")
     nm = nm.replace("å", "a")
     nm = nm.replace("æ", "ae")
     nm = nm.replace("œ", "oe")
@@ -132,10 +137,12 @@ def normalizeName(nm):
     nm = nm.replace("ĳ", "ij")
     nm = nm.replace("ÿ", "y")
     nm = nm.replace("ý", "y")
+    nm = nm.replace("ž", "z")
     nm = nm.replace("š", "s")
     nm = nm.replace("č", "c")
     nm = nm.replace("ç", "c")
     nm = nm.replace("ñ", "n")
+    nm = nm.replace("ń", "n")
     nm = nm.replace("ł", "l")
     nm = nm.replace("-", " ")
     return nm
@@ -165,21 +172,23 @@ def main(argv):
     # Defaults
     out = sys.stdout
     pat = None
+    mailonly = False
     # Option handling
     try:
-        (optlist, args) = getopt.gnu_getopt(argv[1:], "ho:p:",
-                                            ("help", "outfile", "pat"))
+        (optlist, args) = getopt.gnu_getopt(argv[1:], "ho:p:m",
+                                            ("help", "outfile", "pat", "mail"))
     except getopt.GetoptError as exc:
         print("Error:", exc, file=sys.stderr)
         sys.exit(usage())
     for opt in optlist:
         if opt[0] == "-h" or opt[0] == "--help":
-            usage()
-            sys.exit(0)
+            sys.exit(usage(0))
         elif opt[0] == "-o" or opt[0] == "--outfile":
             out = open(opt[1], "w", encoding="utf-8")
         elif opt[0] == "-p" or opt[0] == "--pat":
             pat = opt[1]
+        elif opt[0] == "-m" or opt[0] == "--mail":
+            mailonly = True
 
     if not args:
         sys.exit(usage())
@@ -198,7 +207,11 @@ def main(argv):
                 githubMail(user, gh)
 
     for user in users:
-        print(user, file=out)
+        if mailonly:
+            if user.mls:
+                print(user.mls[0], file=out)
+        else:
+            print(user, file=out)
 
 
 # Call main
